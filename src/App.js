@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from "axios";
+import { useEffect, useState } from "react";
+import "./App.css";
+import RatingView from "./Component/RatingView";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [logged, setLogged] = useState(false);
+
+  const login = () => {
+    axios
+      .post("https://five-star-reviews.herokuapp.com/api/login", {
+        user: { email: "jay@aol.com", password: "wha123t" },
+      })
+      .then((res) => {
+        console.log(res.data);
+        localStorage.setItem("logintoken", res.data.token);
+        setLogged(true);
+      });
+  };
+
+  useEffect(() => {
+    login();
+  }, []);
+
+  if (!logged) {
+    return <span />;
+  }
+
+  return <RatingView />;
 }
 
 export default App;

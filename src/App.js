@@ -15,7 +15,6 @@ function App() {
         user: { email: loginEmail, password: loginPassword },
       })
       .then((res) => {
-        console.log(res.data);
         localStorage.setItem("logintoken", res.data.token);
         setLogged(true);
       });

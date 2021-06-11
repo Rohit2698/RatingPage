@@ -30,8 +30,8 @@ function App() {
 
   return (
     <div className={"App"}>
-      <Container>
-        <Card style={{ maxWidth: "100%" }} elevation={5}>
+      <Container style={{ display: "flex", justifyContent: "center" }}>
+        <Card style={{ width: "75%" }} elevation={5}>
           <RatingView />
         </Card>
       </Container>

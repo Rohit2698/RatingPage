@@ -2,17 +2,19 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import "./App.css";
 import RatingView from "./Component/RatingView";
+import { Card, Container } from "@material-ui/core";
+import { loginApiUrl } from "./Constants/ApiConstants";
+import { loginEmail, loginPassword } from "./Constants/DummyData";
 
 function App() {
   const [logged, setLogged] = useState(false);
 
   const login = () => {
     axios
-      .post("https://five-star-reviews.herokuapp.com/api/login", {
-        user: { email: "jay@aol.com", password: "wha123t" },
+      .post(loginApiUrl, {
+        user: { email: loginEmail, password: loginPassword },
       })
       .then((res) => {
-        console.log(res.data);
         localStorage.setItem("logintoken", res.data.token);
         setLogged(true);
       });
@@ -26,7 +28,13 @@ function App() {
     return <span />;
   }
 
-  return <RatingView />;
+  return (
+    <Container style={{ marginTop: 30 }}>
+      <Card style={{ maxWidth: "100%" }} elevation={5}>
+        <RatingView />
+      </Card>
+    </Container>
+  );
 }
 
 export default App;

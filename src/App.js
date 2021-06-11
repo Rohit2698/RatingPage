@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import "./App.css";
 import RatingView from "./Component/RatingView";
-import { Dialog } from "@material-ui/core";
+import { Card, Container } from "@material-ui/core";
 import { loginApiUrl } from "./Constants/ApiConstants";
 import { loginEmail, loginPassword } from "./Constants/DummyData";
 
@@ -29,9 +29,11 @@ function App() {
   }
 
   return (
-    <Dialog open={true} maxWidth={"md"} fullWidth>
-      <RatingView />
-    </Dialog>
+    <Container style={{ marginTop: 30 }}>
+      <Card style={{ maxWidth: "100%" }} elevation={5}>
+        <RatingView />
+      </Card>
+    </Container>
   );
 }
 

@@ -29,11 +29,13 @@ function App() {
   }
 
   return (
-    <Container style={{ marginTop: 30 }}>
-      <Card style={{ maxWidth: "100%" }} elevation={5}>
-        <RatingView />
-      </Card>
-    </Container>
+    <div className={"App"}>
+      <Container>
+        <Card style={{ maxWidth: "100%" }} elevation={5}>
+          <RatingView />
+        </Card>
+      </Container>
+    </div>
   );
 }
 

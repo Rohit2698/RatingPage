@@ -1,3 +1,5 @@
+![image](https://user-images.githubusercontent.com/36307148/121651017-cb166300-cab7-11eb-9d4f-25ff479c35dd.png)
+
 # How to start
 1. yarn install
 2. yarn start

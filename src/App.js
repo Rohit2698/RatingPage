@@ -2,14 +2,17 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import "./App.css";
 import RatingView from "./Component/RatingView";
+import { Dialog } from "@material-ui/core";
+import { loginApiUrl } from "./Constants/ApiConstants";
+import { loginEmail, loginPassword } from "./Constants/DummyData";
 
 function App() {
   const [logged, setLogged] = useState(false);
 
   const login = () => {
     axios
-      .post("https://five-star-reviews.herokuapp.com/api/login", {
-        user: { email: "jay@aol.com", password: "wha123t" },
+      .post(loginApiUrl, {
+        user: { email: loginEmail, password: loginPassword },
       })
       .then((res) => {
         console.log(res.data);
@@ -26,7 +29,11 @@ function App() {
     return <span />;
   }
 
-  return <RatingView />;
+  return (
+    <Dialog open={true} maxWidth={"md"} fullWidth>
+      <RatingView />
+    </Dialog>
+  );
 }
 
 export default App;

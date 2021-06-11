@@ -6,86 +6,145 @@ import {
   Typography,
 } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
-import { useMemo } from "react";
-import rateone from "../Images/rateone.png";
-import ratetwo from "../Images/ratethree.png";
-import ratethree from "../Images/ratefive.png";
 import axios from "axios";
+import Rating from "@material-ui/lab/Rating";
+import { doctorInfoApiUrl, reviewApiUrl } from "../Constants/ApiConstants";
+import { visitDate } from "../Constants/DummyData";
 
 const RatingView = () => {
   const [rating, setRating] = useState("1");
+  const [di, setDi] = useState(undefined);
   const [feedback, setFeedback] = useState("");
   const [token, setToken] = useState("");
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    address: "",
+    googleReviewUrl: "",
+  });
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   useEffect(() => {
     const urlRating = window.location.href;
-    setRating(urlRating?.split("=")[1]);
+    setRating(urlRating?.split("&")[0].split("=")[1]);
+    const di = urlRating?.split("&")[1];
+    setDi(di?.split("=")[1]);
     const val = localStorage.getItem("logintoken");
     setToken(val);
-  }, []);
-
-  const smileyView = useMemo(() => {
-    if (rating === "1") {
-      return (
-        <img src={rateone} style={{ height: 100, width: 100 }} alt={"img"} />
-      );
-    }
-    if (rating === "2") {
-      return (
-        <img src={rateone} style={{ height: 100, width: 100 }} alt={"img"} />
-      );
-    }
-    if (rating === "3") {
-      return (
-        <img src={ratetwo} style={{ height: 100, width: 100 }} alt={"img"} />
-      );
-    }
-    if (rating === "4") {
-      return (
-        <img src={ratetwo} style={{ height: 100, width: 100 }} alt={"img"} />
-      );
-    }
-    if (rating === "5") {
-      return (
-        <img src={ratethree} style={{ height: 100, width: 100 }} alt={"img"} />
-      );
-    }
+    axios
+      .get(doctorInfoApiUrl(di?.split("=")[1]))
+      .then((res) => {
+        const data = res.data.data;
+        setUserInfo({
+          name: data.name,
+          address: data.address,
+          googleReviewUrl: data.google_review_url,
+        });
+      })
+      .catch(() => {
+        setUserInfo({
+          name: "Dr. Rahul Patel",
+          address: "Some address",
+          googleReviewUrl: "https://g.page/r/CWsHb0-ZbiR9EAg/review",
+        });
+      });
   }, [rating]);
 
   const submitResponse = () => {
-    axios.post(
-      "https://five-star-reviews.herokuapp.com/api/v1/reviews/",
-      {
-        review: {
-          rating: rating,
-          comment: feedback,
-          visit_date: "2021-06-08",
+    axios
+      .post(
+        reviewApiUrl,
+        {
+          review: {
+            rating: rating,
+            comment: feedback,
+            visit_date: visitDate,
+          },
         },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then(() => {
+        setReviewSubmitted(true);
+        navigator.clipboard.writeText(feedback);
+      });
   };
 
-  if (!rating) {
-    return <h1>rating is missing from url</h1>;
+  if (!rating || !di) {
+    return (
+      <Container style={{ padding: 50 }}>
+        <h1>rating or di is missing from url</h1>;
+      </Container>
+    );
+  }
+
+  if (reviewSubmitted) {
+    return (
+      <Container style={{ textAlign: "center", padding: 50 }}>
+        <Grid container spacing={6}>
+          <Grid item xs={12}>
+            <Typography color="primary" variant="h5">
+              Thank you for your review.
+            </Typography>
+          </Grid>
+          {rating === "5" && (
+            <>
+              <Grid item xs={12}>
+                <Typography>
+                  Would you also like to submit the review on google. Your
+                  review comment has been copied to clipboard. You can simply
+                  paste it there.
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant={"contained"}
+                  color={"primary"}
+                  onClick={() => window.open(userInfo.googleReviewUrl, "_self")}
+                >
+                  Yes, take me google review page
+                </Button>
+              </Grid>
+            </>
+          )}
+        </Grid>
+      </Container>
+    );
   }
 
   return (
-    <Container style={{ textAlign: "center" }}>
-      <Grid container alignItems={"center"} spacing={6}>
-        <Grid item xs={12}>
-          {smileyView}
+    <Container style={{ padding: 50 }}>
+      <Grid container spacing={6}>
+        <Grid item xs={12} style={{ paddingTop: 0 }}>
+          <Typography variant={"button"}>SHARE FEEDBACK</Typography>
+          <Typography
+            style={{
+              fontSize: 30,
+              fontWeight: 300,
+            }}
+          >
+            {userInfo.name}
+          </Typography>
+          <Typography>{userInfo.address}</Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} style={{ textAlign: "center", paddingTop: 0 }}>
+          <Rating
+            readOnly
+            value={rating}
+            precision={1}
+            style={{
+              fontSize: 100,
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} style={{ textAlign: "center", paddingTop: 0 }}>
           <Typography variant={"h4"}>
-            We approciate your feedback. How can we improve?
+            We appreciate your feedback. How can we improve?
           </Typography>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} style={{ textAlign: "center", paddingTop: 0 }}>
           <Typography variant={"body1"}>
             It is important to as at Vetri Cucina that every guest is entirely
             satisfied. Please tell us what would have made your experience a
@@ -99,16 +158,16 @@ const RatingView = () => {
             variant={"outlined"}
             fullWidth
             multiline
-            rows={6}
+            rows={2}
           />
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} style={{ textAlign: "center" }}>
           <Button
             variant={"contained"}
             color={"primary"}
             onClick={submitResponse}
           >
-            Share message
+            Share feedback
           </Button>
         </Grid>
       </Grid>

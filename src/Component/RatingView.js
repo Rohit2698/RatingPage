@@ -9,11 +9,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Rating from "@material-ui/lab/Rating";
 import { doctorInfoApiUrl, reviewApiUrl } from "../Constants/ApiConstants";
-import { visitDate } from "../Constants/DummyData";
+import { failedToastConfiguration, visitDate } from "../Constants/DummyData";
+import { toast } from "react-toastify";
 
 const RatingView = () => {
-  const [rating, setRating] = useState("1");
-  const [di, setDi] = useState(undefined);
+  const [rating, setRating] = useState(0);
+  const [diId, setDiId] = useState("");
   const [feedback, setFeedback] = useState("");
   const [token, setToken] = useState("");
   const [userInfo, setUserInfo] = useState({
@@ -25,29 +26,30 @@ const RatingView = () => {
 
   useEffect(() => {
     const urlRating = window.location.href;
-    setRating(urlRating?.split("&")[0].split("=")[1]);
+    setRating(parseInt(urlRating?.split("&")[0].split("=")[1]));
     const di = urlRating?.split("&")[1];
-    setDi(di?.split("=")[1]);
+    setDiId(di?.split("=")[1]);
     const val = localStorage.getItem("logintoken");
     setToken(val);
-    axios
-      .get(doctorInfoApiUrl(di?.split("=")[1]))
-      .then((res) => {
-        const data = res.data.data;
-        setUserInfo({
-          name: data.name,
-          address: data.address,
-          googleReviewUrl: data.google_review_url,
+    di &&
+      axios
+        .get(doctorInfoApiUrl(di?.split("=")[1]))
+        .then((res) => {
+          const data = res.data.data;
+          setUserInfo({
+            name: data.name,
+            address: data.address,
+            googleReviewUrl: data.google_review_url,
+          });
+        })
+        .catch(() => {
+          setUserInfo({
+            name: "Dr. Rahul Patel",
+            address: "Some address",
+            googleReviewUrl: "https://g.page/r/CWsHb0-ZbiR9EAg/review",
+          });
         });
-      })
-      .catch(() => {
-        setUserInfo({
-          name: "Dr. Rahul Patel",
-          address: "Some address",
-          googleReviewUrl: "https://g.page/r/CWsHb0-ZbiR9EAg/review",
-        });
-      });
-  }, [rating]);
+  }, []);
 
   const submitResponse = () => {
     axios
@@ -68,17 +70,16 @@ const RatingView = () => {
       )
       .then(() => {
         setReviewSubmitted(true);
+        toast("FeedBack saved");
         navigator.clipboard.writeText(feedback);
+      })
+      .catch((err) => {
+        toast.error(
+          "Review for today is already given",
+          failedToastConfiguration
+        );
       });
   };
-
-  if (!rating || !di) {
-    return (
-      <Container style={{ padding: 50 }}>
-        <h1>rating or di is missing from url</h1>;
-      </Container>
-    );
-  }
 
   if (reviewSubmitted) {
     return (
@@ -89,7 +90,7 @@ const RatingView = () => {
               Thank you for your review.
             </Typography>
           </Grid>
-          {rating === "5" && (
+          {rating === 5 && !!diId && (
             <>
               <Grid item xs={12}>
                 <Typography>
@@ -131,11 +132,13 @@ const RatingView = () => {
         </Grid>
         <Grid item xs={12} style={{ textAlign: "center", paddingTop: 0 }}>
           <Rating
-            readOnly
             value={rating}
             precision={1}
             style={{
               fontSize: 100,
+            }}
+            onChange={(event, newValue) => {
+              setRating(newValue);
             }}
           />
         </Grid>
